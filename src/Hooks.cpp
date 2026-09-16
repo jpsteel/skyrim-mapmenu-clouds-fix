@@ -18,18 +18,16 @@ namespace {
         using release_t = void (*)();
         using load_t = void (*)(RE::TESWorldSpace*);
         using configure_t = void (*)(float);
+        
+        static REL::Relocation<release_t> release{REL::ID(53149)};
 
-        // Skyrim SE/AE 1.6.1170 addresses
-        static REL::Relocation<detach_t> detach{REL::Offset(0x9892B0)};
+        static REL::Relocation<configure_t> configure{REL::ID(53151)};
 
-        static REL::Relocation<release_t> release{REL::Offset(0x989130)};
+        static REL::Relocation<load_t> load{REL::ID(53157)};
 
-        static REL::Relocation<load_t> load{REL::Offset(0x9895D0)};
+        static REL::Relocation<std::uintptr_t> cloudCacheAddress{REL::ID(406687)};
 
-        static REL::Relocation<configure_t> configure{REL::Offset(0x989210)};
-
-        // qword_7FF6461FFA00 on SkyrimSE.exe 1.6.1170
-        static REL::Relocation<std::uintptr_t> cloudCacheAddress{REL::Offset(0x31AFA00)};
+        static REL::Relocation<detach_t> detach{REL::ID(53151), 0xA0};
 
         bool g_cloudAttached = false;
 
@@ -98,7 +96,9 @@ namespace {
         RE::TESWorldSpace* world = a_player->GetWorldspace();
 
         if (!world && a_menu) {
-            world = a_menu->GetRuntimeData2().worldSpace;
+            if (auto* runtimeData = a_menu->GetRuntimeData2()) {
+                world = runtimeData->worldSpace;
+            }
         }
 
         if (!world) {
